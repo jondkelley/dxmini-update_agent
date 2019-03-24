@@ -49,16 +49,18 @@ import hashlib
 import tarfile
 import uuid
 import json, codecs
+from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
-FILE_PREFIX = "."
-
-if os.path.isfile('{}/dxmini_serial'.format(FILE_PREFIX)):
-    exit(0)
+FILE_PREFIX = "/etc"
 
 def serial_generator():
     return str(int("".join(str(uuid.uuid4()).split('-')[:3]), 16))
+
+def touch(path):
+    with open(path, 'a'):
+        os.utime(path, None)
 
 class provisionCommand():
     """dxmini provision
@@ -73,6 +75,9 @@ class provisionCommand():
         """
         provision first time users
         """
+        # Activate device
+        touch('/.activate')
+
         ## Generate serial number
         with open('{}/dxmini_serial'.format(FILE_PREFIX), 'w') as f:
             #json.dump(data, codecs.getwriter('utf-8')(f), ensure_ascii=False)
