@@ -62,12 +62,12 @@ logger = logging.getLogger(__name__)
 
 def fs_rw():
     """enable rw mode"""
-    p = subprocess.Popen("rpi-rw", stdout=subprocess.PIPE, shell=True)
+    p = subprocess.Popen("mount -o remount,rw /", stdout=subprocess.PIPE, shell=True)
     (out, err) = p.communicate()
 
 def fs_ro():
     """enable rw mode"""
-    p = subprocess.Popen("rpi-ro", stdout=subprocess.PIPE, shell=True)
+    p = subprocess.Popen("mount -o remount,ro /", stdout=subprocess.PIPE, shell=True)
     (out, err) = p.communicate()
 
 ################################
@@ -528,7 +528,7 @@ def update_python_agent(manifest):
 
         # Install new agent
         logger.info("Updating agent with setup.py")
-        p = subprocess.Popen("python3 dxmini-update_python_agent-{}/setup.py install".format(latest_python_agent), stdout=subprocess.PIPE, shell=True)
+        p = subprocess.Popen("sudo python3 dxmini-update_python_agent-{}/setup.py install".format(latest_python_agent), stdout=subprocess.PIPE, shell=True)
         (out, err) = p.communicate()
         print(out)
         logger.info("Python agent update complete!")
