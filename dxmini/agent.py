@@ -182,12 +182,7 @@ def get_upnp_settings():
     if os.path.isfile('/usr/local/sbin/pistar-upnp.service'):
         enabled_upnp = subprocess.check_output(upnp_enabled_cmd, shell=True).decode('utf-8').split('\n')[:-1]
         disabled_upnp = subprocess.check_output(upnp_disabled_cmd, shell=True).decode('utf-8').split('\n')[:-1]
-        return {
-        "format_v1": {
-            "upnp_on": enabled_upnp,
-            "upnp_off": disabled_upnp
-            }
-        }
+        return { "on": enabled_upnp, "off": disabled_upnp }
     else:
         return False
 
