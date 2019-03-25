@@ -161,6 +161,7 @@ def get_service_tag():
     """
     serialfile = '/etc/dxmini_serial'
     if os.path.isfile(serialfile):
+        logger.info("Returning SERVICE_TAG")
         with open(serialfile,"r") as fi:
             serial = fi.read()
             return serial
