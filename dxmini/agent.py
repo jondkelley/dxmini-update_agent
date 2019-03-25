@@ -584,7 +584,7 @@ class AgentCommand():
         self.args = args
         #print_arguements(args)
 
-    def provision(self):get_service_tag
+    def provision(self):
         if not os.path.isfile('/.in_production'):
             touch('/.in_production')
         else:
