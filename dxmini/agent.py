@@ -368,54 +368,20 @@ def file_age_in_seconds(pathname):
         touch(pathname)
     return time.time() - os.stat(pathname)[stat.ST_MTIME]
 
-def selfie_in():
+def get_nat_ip():
     """
-    cache local and remote interface
+    get the local address
     """
-    if not os.path.isfile('/tmp/.0'):
-        touch('/tmp/.1')
-
-    if not os.path.isfile('/tmp/.0'):
-        if file_age_in_seconds('/tmp/.0') > 43200:
-            s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-            try:
-                # doesn't even have to be reachable, neat trick eh?
-                s.connect(('10.255.255.255', 1))
-                a = s.getsockname()[0]
-            except:
-                a = '127.0.0.1'
-            finally:
-                s.close()
-            with open('/tmp/.0',"w") as fi:
-                fi.write(a)
-                return a
-    else:
-        with open("/tmp/.0", "r") as fcontext:
-            a = fcontext.read()
-            return a
-
-def selfie_out():
-    if not os.path.isfile('/tmp/.1'):
-        touch('/tmp/.1')
-
-    if os.path.isfile('/tmp/.1'):
-        if file_age_in_seconds('/tmp/.1') > 43200:
-            try:
-                r = requests.get('http://ifconfig.me')
-                b = r.text
-            except:
-                r = requests.get('http://api.dxmini.uberleet.org/dxmini-function/selfie')
-                b = r.text
-            with open('/tmp/.1',"w") as fi:
-                i.write(b)
-                return b
-        else:
-            with open("/tmp/.1", "r") as fcontext:
-                b = fcontext.read()
-    else:
-        with open("/tmp/.1", "r") as fcontext:
-            b = fcontext.read()
-            return b
+    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    try:
+        # doesn't even have to be reachable, neat trick eh?
+        s.connect(('10.255.255.255', 1))
+        a = s.getsockname()[0]
+    except:
+        a = '127.0.0.1'
+    finally:
+        s.close()
+    return a
 
 def register_client():
     historical_calls = get_historical_calls()
@@ -441,8 +407,7 @@ def register_client():
             "activation_dt": get_customer_production_date(),
             "device_uptime": uptime(),
             "tz": get_timezone(),
-            "self_in": selfie_in(),
-            "self_out": selfie_out()
+            "ip": get_nat_ip()
         },
         "config": {
             "settings": get_mmdvm_config(),
