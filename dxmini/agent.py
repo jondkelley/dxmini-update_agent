@@ -128,8 +128,8 @@ def get_upnp_settings():
         p = subprocess.Popen(upnp_disabled_cmd, stdout=subprocess.PIPE, shell=True)
         (disabled_upnp, err) = p.communicate()
         return {
-            "enabled": str(enabled_upnp).split('\n'),
-            "disabled": str(disabled_upnp).split('\n')
+            "enabled": str(enabled_upnp.split('\n')),
+            "disabled": str(disabled_upnp.split('\n'))
             }
     else:
         return False
