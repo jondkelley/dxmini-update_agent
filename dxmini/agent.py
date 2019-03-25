@@ -413,7 +413,7 @@ def announce_client():
             "rev": get_revision(),
             "model": get_model(),
             "customer_production_start": get_customer_production_date(),
-            "device_uptime": int(uptime()),
+            "device_uptime": uptime(),
             "tz": get_timezone().strip()
         },
         "config": {
