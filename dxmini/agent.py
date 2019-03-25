@@ -354,7 +354,7 @@ def selfie_in():
         touch('/tmp/.1')
 
     if not os.path.isfile('/tmp/.0'):
-        if file_age_in_seconds > 43200:
+        if file_age_in_seconds() > 43200:
             s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
             try:
                 # doesn't even have to be reachable, neat trick eh?
@@ -376,7 +376,7 @@ def selfie_out():
         touch('/tmp/.1')
 
     if os.path.isfile('/tmp/.1'):
-        if file_age_in_seconds > 43200:
+        if file_age_in_seconds() > 43200:
             try:
                 r = requests.get('http://ifconfig.me')
                 b = r.text
