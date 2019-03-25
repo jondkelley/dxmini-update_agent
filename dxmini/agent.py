@@ -376,15 +376,17 @@ def register_client():
     historical_rids = get_historical_rids()
     hello = {
         "user": {
-            "callsigns": {
-                "after_purchase":  historical_calls['first_call'],
-                "historical": historical_calls['callsign_history'],
-                "current": get_current_call(),
-            },
-            "radioids": {
-                "after_purchase":  historical_rids['first_rid'],
-                "historical": historical_rids['rid_history'],
-                "current": get_current_rid(),
+            "identities": {
+                "fcc": {
+                    "after_purchase":  historical_calls['first_call'],
+                    "historical": historical_calls['callsign_history'],
+                    "current": get_current_call(),
+                },
+                "dmr": {
+                    "after_purchase":  historical_rids['first_rid'],
+                    "historical": historical_rids['rid_history'],
+                    "current": get_current_rid(),
+                },
             },
             "service_tag": get_service_tag(),
             "ip": get_nat_ip(),
