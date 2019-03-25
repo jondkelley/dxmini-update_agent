@@ -33,6 +33,7 @@ Options:
 # dxmini demo --example [-s STRING | -n TIMES] = one or the other
 # changing [] to () makes optional parameters required
 
+from uptime import uptime
 from collections import defaultdict
 import configparser
 import shutil
@@ -54,7 +55,6 @@ from os import environ
 import hashlib
 import tarfile
 import time
-import psutil
 import uuid
 import platform
 import fileinput
@@ -152,7 +152,7 @@ def uptime():
     """
     return raspi uptime
     """
-    return time.time() - psutil.boot_time()
+    return uptime()
 
 def get_service_tag():
     """
