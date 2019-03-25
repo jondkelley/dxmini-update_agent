@@ -184,8 +184,8 @@ def get_upnp_settings():
         disabled_upnp = subprocess.check_output(upnp_disabled_cmd, shell=True).decode('utf-8').split('\n')
         return {
         "format_v1": {
-            "upnp_on": str(enabled_upnp),
-            "upnp_off": str(disabled_upnp)
+            "upnp_on": enabled_upnp,
+            "upnp_off": disabled_upnp
             }
         }
     else:
