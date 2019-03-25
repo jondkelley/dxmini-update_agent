@@ -207,18 +207,6 @@ def get_upnp_settings():
     else:
         return dict()
 
-def get_wpa_supplicant():
-    """
-    retrieves wifi configs without passwords of course
-    """
-    if os.path.isfile('/etc/wpa_supplicant/wpa_supplicant.conf'):
-        supplicant_cmd = """cat /etc/wpa_supplicant/wpa_supplicant.conf | sed -e 's/.*psk.*/\tpsk=\"***\"/'"""
-        p = subprocess.Popen(supplicant_cmd, stdout=subprocess.PIPE, shell=True)
-        (supplicant, err) = p.communicate()
-        return str(supplicant)
-    else:
-        return False
-
 def get_dxmini_panel_version():
     """
     ew this is hacky
@@ -397,11 +385,11 @@ def register_client():
                 "after_purchase":  historical_rids['first_rid'],
                 "historical": historical_rids['rid_history'],
                 "current": get_current_rid(),
-            }
+            },
+            "service_tag": get_service_tag()
         },
-        "device": {
+        "rpi_img": {
             "dashboard": str(get_dxmini_panel_version()),
-            "service_tag": get_service_tag(),
             "rev": get_revision(),
             "model": get_model(),
             "activation_dt": get_customer_production_date(),
@@ -409,9 +397,8 @@ def register_client():
             "tz": get_timezone(),
             "ip": get_nat_ip()
         },
-        "config": {
+        "configuration": {
             "settings": get_mmdvm_config(),
-            #"wpa_supplicant": get_wpa_supplicant(),
             "upnp": get_upnp_settings()
         },
         "image_information": get_pistar_image_version()
