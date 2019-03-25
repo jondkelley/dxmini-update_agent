@@ -429,7 +429,8 @@ def register_client():
             "settings": get_mmdvm_config(),
             #"wpa_supplicant": get_wpa_supplicant(),
             "upnp": get_upnp_settings()
-        }
+        },
+        "image_information": get_pistar_image_version()
     }
     print(
          json.dumps(hello, indent=3)
@@ -442,6 +443,18 @@ def register_client():
         announce = requests.post(client_registration_url, data=json.dumps(hello))
     except:
         logger.error("Registration server is offline")
+
+def get_pistar_image_version():
+    """
+    retrieve some settings from the RPi base image
+    """
+    distilled_config = {}
+    #############################
+    config = configparser.ConfigParser()
+    config.read('/etc/pistar-release')
+    distilled_config['pistar_image'] = config._sections['Pi-Star']
+
+    return distilled_config
 
 def get_mmdvm_config():
     """
@@ -457,7 +470,10 @@ def get_mmdvm_config():
         distilled_config['mmdvm_general'] = {}
 
     try:
-        distilled_config['mmdvm_info'] = config._sections['Info']
+        mmdvm_info = {}
+        for k, v in config._sections['Info'].items():
+            mmdvm_info[k] = v.strip("\"") # remove wrapping quotes on some strings
+        distilled_config['mmdvm_info'] = mmdvm_info
     except:
         distilled_config['mmdvm_info'] = {}
 
@@ -476,10 +492,6 @@ def get_mmdvm_config():
         }
     except:
         distilled_config['network_summary'] = dict()
-
-    config = configparser.ConfigParser()
-    config.read('/etc/pistar-release')
-    distilled_config['pistar_image'] = config._sections['Pi-Star']
 
     return distilled_config
 
