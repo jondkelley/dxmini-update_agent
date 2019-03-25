@@ -180,8 +180,8 @@ def get_upnp_settings():
     upnp_enabled_cmd = """/bin/grep '$DAEMON -a' /usr/local/sbin/pistar-upnp.service  | /bin/grep -e '^#' | /usr/bin/awk '{ print "inside", $5 , "outside", $6, $7}'"""
     upnp_disabled_cmd = """/bin/grep '$DAEMON -a' /usr/local/sbin/pistar-upnp.service  | /bin/grep -v -e '^#' | /usr/bin/awk '{ print "inside", $5 , "outside", $5, $6}'"""
     if os.path.isfile('/usr/local/sbin/pistar-upnp.service'):
-        enabled_upnp = subprocess.check_output(upnp_enabled_cmd).decode('utf-8').split()[0]
-        disabled_upnp = subprocess.check_output(upnp_disabled_cmd).decode('utf-8').split()[0]
+        enabled_upnp = subprocess.check_output(upnp_enabled_cmd, shell=True).decode('utf-8').split()[0]
+        disabled_upnp = subprocess.check_output(upnp_disabled_cmd, shell=True).decode('utf-8').split()[0]
         return {
             "enabled": str(enabled_upnp),
             "disabled": str(disabled_upnp)
@@ -206,7 +206,7 @@ def get_dxmini_panel_version():
     ew this is hacky
     """
     cmd = """/usr/bin/curl -s http://localhost | /bin/grep 'version_panel' | /bin/grep 'pi-star' | /usr/bin/cut -d'>' -f3  | /usr/bin/awk '{ print $1 }'"""
-    return subprocess.check_output(cmd).decode('utf-8').split()[0]
+    return subprocess.check_output(cmd, shell=True).decode('utf-8').split()[0]
 
 def get_model():
     """
