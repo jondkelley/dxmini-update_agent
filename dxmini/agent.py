@@ -384,7 +384,7 @@ def selfie():
                 b = fcontext.read()
     return (a, b)
 
-def announce_client():
+def register_client():
     historical_calls = get_historical_calls()
     historical_rids = get_historical_rids()
     hello = {
@@ -629,7 +629,7 @@ class AgentCommand():
         """
         with MicroSdCard("/"):
             mk_ping_crontab()
-            announce_client()
+            register_client()
 
     def cmd(self):
         """
