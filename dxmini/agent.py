@@ -179,12 +179,23 @@ def get_upnp_settings():
     """
     retrieves current upnp configurations
     """
-    upnp_enabled_cmd = """/bin/grep '$DAEMON -a' /usr/local/sbin/pistar-upnp.service  | /bin/grep -e '^#' | /usr/bin/awk '{ print "inside", $5 , "outside", $6, $7}'"""
-    upnp_disabled_cmd = """/bin/grep '$DAEMON -a' /usr/local/sbin/pistar-upnp.service  | /bin/grep -v -e '^#' | /usr/bin/awk '{ print "inside", $5 , "outside", $5, $6}'"""
+    upnp_enabled_cmd = """/bin/grep '$DAEMON -a' /usr/local/sbin/pistar-upnp.service  | /bin/grep -e '^#' | /usr/bin/awk '{ print "inside=" $5 ",outside=" $6 ",proto=" $7}'"""
+    upnp_disabled_cmd = """/bin/grep '$DAEMON -a' /usr/local/sbin/pistar-upnp.service  | /bin/grep -v -e '^#' | /usr/bin/awk '{ print "inside=" $5 ",outside=" $5 ",proto=" $6}'"""
     if os.path.isfile('/usr/local/sbin/pistar-upnp.service'):
         enabled_upnp = subprocess.check_output(upnp_enabled_cmd, shell=True).decode('utf-8').split('\n')[:-1]
         disabled_upnp = subprocess.check_output(upnp_disabled_cmd, shell=True).decode('utf-8').split('\n')[:-1]
-        return { "on": enabled_upnp, "off": disabled_upnp }
+        struct = { "on": {}, "off": {}}
+        i = 0
+        for rule in enabled_upnp.split(','):
+            (key, value) = rule.split('=')
+            i += 1
+            struct['on'][key][i] = value
+        i = 0
+        for rule in disabled_upnp.split(','):
+            (key, value) = rule.split('=')
+            i += 1
+            struct['off'][key][i] = value
+        return struct
     else:
         return False
 
