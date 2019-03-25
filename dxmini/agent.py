@@ -203,6 +203,15 @@ def get_wpa_supplicant():
     else:
         return False
 
+def get_dxmini_panel_version():
+    """
+    ew this is hacky
+    """
+    cmd = """curl -s http://localhost | grep 'version_panel' | grep 'pi-star' | cut -d'>' -f3  | awk '{ print $1 }'"""
+    p = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=True)
+    (current_version, err) = p.communicate()
+    return current_version.strip()
+
 def get_model():
     """
     returns model from flash
@@ -399,6 +408,7 @@ def announce_client():
             }
         },
         "device": {
+            "dxmini_panel": get_dxmini_panel_version()
             "service_tag": get_service_tag().rstrip(),
             "rev": get_revision(),
             "model": get_model(),
@@ -588,7 +598,7 @@ class AgentCommand():
         if not os.path.isfile('/.in_production'):
             touch('/.in_production')
         else:
-            logger.error("Registration file, OK")
+            logger.info("Registration file, OK")
 
         ## Generate serial number
 
@@ -596,7 +606,7 @@ class AgentCommand():
             newly_service_tag = get_service_tag()
             logger.info("Hooray, new service tag number {tag}".format(tag=newly_service_tag))
         else:
-            logger.error("Support file, OK")
+            logger.info("Support file, OK")
 
     def update(self):
         """
