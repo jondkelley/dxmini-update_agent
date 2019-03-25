@@ -414,7 +414,7 @@ def announce_client():
             "model": get_model(),
             "customer_production_start": get_customer_production_date(),
             "device_uptime": int(uptime()),
-            "tz": get_timezone()
+            "tz": get_timezone().strip()
         },
         "config": {
             "settings": get_mmdvm_config(),
