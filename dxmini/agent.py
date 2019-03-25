@@ -446,7 +446,7 @@ def get_mmdvm_config():
         distilled_config['mmdvm_info'] = {}
 
     try:
-        distilled_config['network_summary'] = {
+        distilled_config['networks'] = {
             "dmr" : config.get('DMR', 'Enable'),
             "dmr_net" : config.get('DMR Network', 'Enable'),
             "nxdn" : config.get('NXDN', 'Enable'),
