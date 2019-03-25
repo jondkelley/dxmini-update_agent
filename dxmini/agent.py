@@ -533,7 +533,7 @@ class AgentCommand():
     """
     def __init__(self, args):
         self.args = args
-        print_arguements(args)
+        #print_arguements(args)
 
     def provision(self):
         if not os.path.isfile('/.activate'):
