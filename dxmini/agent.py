@@ -152,7 +152,7 @@ def uptime():
     """
     return raspi uptime
     """
-    return uptime()
+    return subprocess.check_output(['cat', '/proc/uptime']).decode('utf-8').split()[0]
 
 def get_service_tag():
     """
