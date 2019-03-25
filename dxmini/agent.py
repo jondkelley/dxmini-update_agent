@@ -389,7 +389,7 @@ def register_client():
                 },
             },
             "service_tag": get_service_tag(),
-            "ip": get_nat_ip(),
+            "wlan": get_nat_ip(),
             "activation_dt": get_customer_production_date(),
             "device_uptime": uptime(),
             "tz": get_timezone(),
