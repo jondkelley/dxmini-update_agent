@@ -64,7 +64,7 @@ import time
 import uuid
 import platform
 import fileinput
-
+import socket
 logger = logging.getLogger(__name__)
 
 class MicroSdCard():
