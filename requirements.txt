@@ -1,3 +1,4 @@
 docopt>=0.6.1
 six
 python-jenkins
+psutil
