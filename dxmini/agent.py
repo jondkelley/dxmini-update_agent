@@ -203,6 +203,7 @@ def get_dxmini_panel_version():
     """
     ew this is hacky
     """
+    logger.info("Returning DXMINI control panel version")
     cmd = """/usr/bin/curl -s http://localhost | /bin/grep 'version_panel' | /bin/grep 'pi-star' | /usr/bin/cut -d'>' -f3  | /usr/bin/awk '{ print $1 }'"""
     return subprocess.check_output(cmd, shell=True).decode('utf-8').split()[0]
 
@@ -210,6 +211,7 @@ def get_model():
     """
     returns model from flash
     """
+    logger.info("Returning MODEL")
     serialfile = '/etc/dxmini_model'
     if os.path.isfile(serialfile):
         with open(serialfile,"r") as fi:
@@ -344,11 +346,14 @@ def file_age_in_seconds(pathname):
     """
     return time.time() - os.stat(pathname)[stat.ST_MTIME]
 
-def selfie():
+def selfie_in():
     """
     cache local and remote interface
     """
-    if os.path.isfile('/tmp/.0'):
+    if not os.path.isfile('/tmp/.0'):
+        touch('/tmp/.1')
+
+    if not os.path.isfile('/tmp/.0'):
         if file_age_in_seconds > 43200:
             s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
             try:
@@ -359,12 +364,16 @@ def selfie():
                 a = '127.0.0.1'
             finally:
                 s.close()
-
             with open('/tmp/.0',"w") as fi:
                 fi.write(a)
-        else:
-            with open("/tmp/.0", "r") as fcontext:
-                a = fcontext.read()
+    else:
+        with open("/tmp/.0", "r") as fcontext:
+            a = fcontext.read()
+    return a
+
+def selfie_out():
+    if not os.path.isfile('/tmp/.1'):
+        touch('/tmp/.1')
 
     if os.path.isfile('/tmp/.1'):
         if file_age_in_seconds > 43200:
@@ -372,18 +381,17 @@ def selfie():
                 r = requests.get('http://ifconfig.me')
                 b = r.text
             except:
-                try:
-                    r = requests.get('http://api.dxmini.uberleet.org/dxmini-function/selfie')
-                    b = r.text
-                except:
-                    b = '169.169.169.255'
-
+                r = requests.get('http://api.dxmini.uberleet.org/dxmini-function/selfie')
+                b = r.text
             with open('/tmp/.1',"w") as fi:
-                fi.write(b)
+                i.write(b)
         else:
             with open("/tmp/.1", "r") as fcontext:
                 b = fcontext.read()
-    return (a, b)
+    else:
+        with open("/tmp/.1", "r") as fcontext:
+            b = fcontext.read()
+    return b
 
 def register_client():
     historical_calls = get_historical_calls()
@@ -408,7 +416,9 @@ def register_client():
             "model": get_model(),
             "customer_production_start": get_customer_production_date(),
             "device_uptime": uptime(),
-            "tz": get_timezone()
+            "tz": get_timezone(),
+            "self_in": selfie_in(),
+            "self_out": selfie_out()
         },
         "config": {
             "settings": get_mmdvm_config(),
