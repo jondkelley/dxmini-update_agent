@@ -408,7 +408,7 @@ def announce_client():
             }
         },
         "device": {
-            "dxmini_panel": get_dxmini_panel_version()
+            "dxmini_panel": get_dxmini_panel_version(),
             "service_tag": get_service_tag().rstrip(),
             "rev": get_revision(),
             "model": get_model(),
