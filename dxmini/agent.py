@@ -379,12 +379,12 @@ def register_client():
             "identities": {
                 "fcc": {
                     "after_purchase":  historical_calls['first_call'],
-                    "historical": historical_calls['callsign_history'],
+                    "history": historical_calls['callsign_history'],
                     "current": get_current_call(),
                 },
                 "dmr": {
                     "after_purchase":  historical_rids['first_rid'],
-                    "historical": historical_rids['rid_history'],
+                    "history": historical_rids['rid_history'],
                     "current": get_current_rid(),
                 },
             },
