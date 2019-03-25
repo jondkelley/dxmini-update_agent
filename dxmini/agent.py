@@ -369,10 +369,11 @@ def selfie_in():
                 s.close()
             with open('/tmp/.0',"w") as fi:
                 fi.write(a)
+                return a
     else:
         with open("/tmp/.0", "r") as fcontext:
             a = fcontext.read()
-    return a
+            return a
 
 def selfie_out():
     if not os.path.isfile('/tmp/.1'):
@@ -388,13 +389,14 @@ def selfie_out():
                 b = r.text
             with open('/tmp/.1',"w") as fi:
                 i.write(b)
+                return b
         else:
             with open("/tmp/.1", "r") as fcontext:
                 b = fcontext.read()
     else:
         with open("/tmp/.1", "r") as fcontext:
             b = fcontext.read()
-    return b
+            return b
 
 def register_client():
     historical_calls = get_historical_calls()
