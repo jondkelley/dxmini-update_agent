@@ -60,6 +60,15 @@ import platform
 
 logger = logging.getLogger(__name__)
 
+def fs_rw():
+    """enable rw mode"""
+    p = subprocess.Popen("rpi-rw", stdout=subprocess.PIPE, shell=True)
+    (out, err) = p.communicate()
+
+def fs_ro():
+    """enable rw mode"""
+    p = subprocess.Popen("rpi-ro", stdout=subprocess.PIPE, shell=True)
+    (out, err) = p.communicate()
 
 ################################
 # Initial provisioning and stuff
@@ -554,7 +563,7 @@ class AgentCommand():
         """
         update dxmini
         """
-
+        fs_rw()
         r = requests.get(DXMINI_MANIFEST_URL)
         manifest = r.json()
         if manifest['_self_federated']:
@@ -567,12 +576,15 @@ class AgentCommand():
         update_python_agent(manifest)
         update_shell_scripts(manifest)
         update_pistar_fork(manifest)
+        fs_ro()
 
     def ping(self):
         """
         pings the dxmini registration service
         """
+        fs_rw()
         announce_client()
+        fs_ro()
 
     def cmd(self):
         """
