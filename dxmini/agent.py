@@ -619,7 +619,6 @@ class AgentCommand():
             update_python_agent(manifest)
             update_shell_scripts(manifest)
             update_pistar_fork(manifest)
-            setfs_ro()
 
     def ping(self):
         """
