@@ -415,9 +415,9 @@ def announce_client():
             "upnp": get_upnp_settings()
         }
     }
-    print(
-        json.dumps(hello, indent=3)
-        )
+    # print(
+    #     json.dumps(hello, indent=3)
+    #     )
     try:
         manifest_url = "https://raw.githubusercontent.com/jondkelley/dxmini-releasemap/master/manifest.json"
         manifest = requests.get(manifest_url)
