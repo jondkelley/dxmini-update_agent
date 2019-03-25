@@ -180,12 +180,14 @@ def get_upnp_settings():
     upnp_enabled_cmd = """/bin/grep '$DAEMON -a' /usr/local/sbin/pistar-upnp.service  | /bin/grep -e '^#' | /usr/bin/awk '{ print "inside", $5 , "outside", $6, $7}'"""
     upnp_disabled_cmd = """/bin/grep '$DAEMON -a' /usr/local/sbin/pistar-upnp.service  | /bin/grep -v -e '^#' | /usr/bin/awk '{ print "inside", $5 , "outside", $5, $6}'"""
     if os.path.isfile('/usr/local/sbin/pistar-upnp.service'):
-        enabled_upnp = subprocess.check_output(upnp_enabled_cmd, shell=True).decode('utf-8').split()[0]
-        disabled_upnp = subprocess.check_output(upnp_disabled_cmd, shell=True).decode('utf-8').split()[0]
+        enabled_upnp = subprocess.check_output(upnp_enabled_cmd, shell=True).decode('utf-8').split('\n')
+        disabled_upnp = subprocess.check_output(upnp_disabled_cmd, shell=True).decode('utf-8').split('\n')
         return {
-            "enabled": str(enabled_upnp),
-            "disabled": str(disabled_upnp)
+        "format_v1": {
+            "upnp_on": str(enabled_upnp),
+            "upnp_off": str(disabled_upnp)
             }
+        }
     else:
         return False
 
@@ -404,7 +406,7 @@ def announce_client():
             }
         },
         "device": {
-            "dxmini_panel": str(get_dxmini_panel_version()),
+            "dashboard": str(get_dxmini_panel_version()),
             "service_tag": get_service_tag(),
             "rev": get_revision(),
             "model": get_model(),
