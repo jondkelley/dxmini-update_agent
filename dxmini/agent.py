@@ -57,29 +57,76 @@ import time
 import psutil
 import uuid
 import platform
+import fileinput
 
 logger = logging.getLogger(__name__)
 
-def fs_rw():
-    """enable rw mode"""
-    p = subprocess.Popen("mount -o remount,rw /", stdout=subprocess.PIPE, shell=True)
-    (out, err) = p.communicate()
+class MicroSdCard():
+    """
+    context manager handles mounting / dismounting the DXMINI filesystem
+    """
 
-def fs_ro():
-    """enable rw mode"""
-    p = subprocess.Popen("mount -o remount,ro /", stdout=subprocess.PIPE, shell=True)
-    (out, err) = p.communicate()
+    def __init__(self, mnt):
+        self.mnt = mnt
+
+    def __enter__(self):
+        # TODO some exception handling please, what is this??
+        p = subprocess.Popen("mount -o remount,rw {}".format(self.mnt), stdout=subprocess.PIPE, shell=True)
+        (out, err) = p.communicate()
+
+    def __exit__(self, *args):
+        # TODO some exception handling please, what is this??
+        p = subprocess.Popen("mount -o remount,ro {}".format(self.mnt), stdout=subprocess.PIPE, shell=True)
+        (out, err) = p.communicate()
 
 ################################
 # Initial provisioning and stuff
 ################################
 
 def serial_generator():
-    return str(int("".join(str(uuid.uuid4()).split('-')[:3]), 16))
+    """
+    function generates service tag number as string
+    """
+    return str(
+            int(
+                "".join(str(uuid.uuid4()).split('-')[:3]
+                ),
+                16
+            )
+        )
 
 def touch(path):
     with open(path, 'a'):
         os.utime(path, None)
+
+def insert_line_after(fi, line_to_find):
+    """ insert line after search text """
+    if os.path.isfile(fi):
+        for line in fileinput.FileInput(file_path,inplace=1):
+            if "TEXT_TO_SEARCH" in line:
+                line=line.replace(line,line+"NEW_TEXT")
+            print line,
+    pass
+
+def mk_ping_crontab():
+    """
+    sets up hourly dxmini registration update
+    """
+    frequency = "daily"
+    cronfile = "/etc/cron.{sched}/dxmini_updates".format(sched=frequency)
+    if os.path.isfile(cronfile):
+        logger.info("{crontab} : crontab already exists, skipping install (SDSAVER)".format(crontab=cronfile))
+    else:
+        logger.info("{crontab} : installing crontab".format(crontab=cronfile))
+        crontab = (
+                "#!/bin/bash" "\n"
+                "# Update the DXMINI registration service" "\n"
+                "# while sleeping randomly over 2 hours to distribute load" "\n"
+                "sleep $[ ( $RANDOM % 7200 )  + 30 ]s" "\n"
+                "sudo dxmini agent --ping" "\n"
+                )
+        with open(cronfile,"w") as fi:
+            fi.write(crontab)
 
 ##########################
 # ping functions and stuff
@@ -107,10 +154,10 @@ def uptime():
     """
     return time.time() - psutil.boot_time()
 
-def get_support_id():
+def get_service_tag():
     """
-    returns support id from flash
-    generates a support id if it's missing
+    returns service tag from flash memory
+    generates one if it's not found
     """
     serialfile = '/etc/dxmini_serial'
     if os.path.isfile(serialfile):
@@ -119,6 +166,7 @@ def get_support_id():
             return serial
     else:
         serial = "".join(str(uuid.uuid4()).split('-')[3:]).upper()
+        logger.warn("Generating new DXMNI service_tag {}".format(serial))
         serial = str(int(serial, 16))
         with open(serialfile,"w") as fi:
             fi.write(serial)
@@ -195,26 +243,25 @@ def get_historical_calls():
     """
     histuser_file = '/etc/.callsign_history'
     if not os.path.isfile(histuser_file):
-        logger.info("Need to build")
+        logger.info("Scheduling rebuild of callsign index")
         history = {"first_call": get_current_call(), "callsign_history": [get_current_call()]}
         with open(histuser_file,"w") as fi:
-            logger.info("Build new index")
+            logger.info("Build new callsign index")
             fi.write(json.dumps(history, indent=3))
             return history
     else:
         with open(histuser_file,"r") as fi:
             history = json.loads(fi.read())
             if get_current_call() not in history['callsign_history']:
-                logger.info("Adding new index")
+                logger.info("Adding new callsign to index")
                 history['callsign_history'].append(get_current_call())
                 with open(histuser_file,"w") as fi:
-                    logger.info("Build new index")
+                    logger.info("Build new callsign index")
                     fi.write(json.dumps(history, indent=3))
                     return history
             else:
                 logger.info("Returning existing index")
                 return history
-            return first_user
 
 def get_historical_rids():
     """
@@ -222,38 +269,31 @@ def get_historical_rids():
     """
     histuser_file = '/etc/.rid_history'
     if not os.path.isfile(histuser_file):
-        logger.info("Need to build")
+        logger.info("Need to build RID index")
         history = {"first_rid": get_current_rid(), "rid_history": [get_current_rid()]}
         with open(histuser_file,"w") as fi:
-            logger.info("Build new index")
+            logger.info("Build new RID index")
             fi.write(json.dumps(history, indent=3))
             return history
     else:
         with open(histuser_file,"r") as fi:
             history = json.loads(fi.read())
             if get_current_rid() not in history['rid_history']:
-                logger.info("Adding new index")
+                logger.info("Adding new RID index")
                 history['rid_history'].append(get_current_rid())
                 with open(histuser_file,"w") as fi:
-                    logger.info("Build new index")
+                    logger.info("Build new RID index")
                     fi.write(json.dumps(history, indent=3))
                     return history
             else:
-                logger.info("Returning existing index")
+                logger.info("Returning existing RID index")
                 return history
-            return first_user
 
 def get_current_call():
     """
     returns first call used in flash
     """
     firstuser_file = '/etc/first_user'
-    # try:
-    #     with open(firstuser_file,"r") as fi:
-    #         first_user = fi.read()
-    #         return first_user
-    # except:
-    #     pass
 
     config = get_mmdvm_config()
     first_user = config['mmdvm_general'].get('callsign', None)
@@ -261,7 +301,7 @@ def get_current_call():
         with open(firstuser_file,"w") as fi:
             fi.write(first_user)
     else:
-        return "ABCDEFG"
+        return False
     return first_user
 
 def get_current_rid():
@@ -285,13 +325,13 @@ def get_current_rid():
         return "0"
     return first_user
 
-def get_warranty_activation_date():
+def get_customer_production_date():
     """
-    returns activation date from flash for warranty tracking
+    returns when the DXMINI goes into production
     """
-    serialfile = '/.activate'
+    serialfile = '/.in_production'
     if os.path.isfile(serialfile):
-        return int(creation_date('/.activate'))
+        return int(creation_date('/.in_production'))
     else:
         return None
 
@@ -359,10 +399,10 @@ def announce_client():
             }
         },
         "device": {
-            "service_tag": get_support_id().rstrip(),
+            "service_tag": get_service_tag().rstrip(),
             "rev": get_revision(),
             "model": get_model(),
-            "start_warranty": get_warranty_activation_date(),
+            "customer_production_start": get_customer_production_date(),
             "device_uptime": int(uptime()),
             "tz": get_timezone()
         },
@@ -544,47 +584,50 @@ class AgentCommand():
         self.args = args
         #print_arguements(args)
 
-    def provision(self):
-        if not os.path.isfile('/.activate'):
-            touch('/.activate')
+    def provision(self):get_service_tag
+        if not os.path.isfile('/.in_production'):
+            touch('/.in_production')
         else:
-            logger.error("Device already activated")
+            logger.error("Registration file, OK")
 
         ## Generate serial number
 
         if not os.path.isfile('/etc/dxmini_serial'):
-            with open('/etc/dxmini_serial', 'w') as f:
-                #json.dump(data, codecs.getwriter('utf-8')(f), ensure_ascii=False)
-                f.write(serial_generator())
+            newly_service_tag = get_service_tag()
+            logger.info("Hooray, new service tag number {tag}".format(tag=newly_service_tag)
         else:
-            logger.error("Support tag already generated")
+            logger.error("Support file, OK")
 
     def update(self):
         """
         update dxmini
         """
-        fs_rw()
-        r = requests.get(DXMINI_MANIFEST_URL)
-        manifest = r.json()
-        if manifest['_self_federated']:
-            r = requests.get(manifest['_self_federated_url'])
+        with MicroSdCard("/"):
+            r = requests.get(DXMINI_MANIFEST_URL)
             manifest = r.json()
-        else:
-            logger.debug("Federation is not active; using github for manifest")
+            if manifest['_self_federated']:
+                try:
+                    r = requests.get(manifest['_self_federated_url'])
+                    manifest = r.json()
+                except:
+                    logger.error("Federation manifest request httpclient failure; defaulting to what github sent us")
+                    pass
+            else:
+                logger.debug("Federation false; using github")
 
-        print(json.dumps(manifest, indent=3))
-        update_python_agent(manifest)
-        update_shell_scripts(manifest)
-        update_pistar_fork(manifest)
-        fs_ro()
+            print(json.dumps(manifest, indent=3))
+            update_python_agent(manifest)
+            update_shell_scripts(manifest)
+            update_pistar_fork(manifest)
+            setfs_ro()
 
     def ping(self):
         """
         pings the dxmini registration service
         """
-        fs_rw()
-        announce_client()
-        fs_ro()
+        with MicroSdCard("/"):
+            mk_ping_crontab()
+            announce_client()
 
     def cmd(self):
         """
