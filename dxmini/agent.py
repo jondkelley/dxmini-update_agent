@@ -99,14 +99,14 @@ def touch(path):
     with open(path, 'a'):
         os.utime(path, None)
 
-def insert_line_after(fi, line_to_find):
-    """ insert line after search text """
-    if os.path.isfile(fi):
-        for line in fileinput.FileInput(file_path,inplace=1):
-            if "TEXT_TO_SEARCH" in line:
-                line=line.replace(line,line+"NEW_TEXT")
-            print line,
-    pass
+# def insert_line_after(fi, line_to_find):
+#     """ insert line after search text """
+#     if os.path.isfile(fi):
+#         for line in fileinput.FileInput(file_path,inplace=1):
+#             if "TEXT_TO_SEARCH" in line:
+#                 line=line.replace(line,line+"NEW_TEXT")
+#             print line,
+#     pass
 
 def mk_ping_crontab():
     """
