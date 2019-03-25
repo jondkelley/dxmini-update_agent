@@ -142,7 +142,7 @@ def get_wpa_supplicant():
         supplicant_cmd = """cat /etc/wpa_supplicant/wpa_supplicant.conf | sed -e 's/.*psk.*/\tpsk=\"***\"/'"""
         p = subprocess.Popen(supplicant_cmd, stdout=subprocess.PIPE, shell=True)
         (supplicant, err) = p.communicate()
-        return supplicant
+        return str(supplicant)
     else:
         return False
 
@@ -359,8 +359,8 @@ def announce_client():
         },
         "config": {
             "settings": get_mmdvm_config(),
-            "wpa_supplicant": get_wpa_supplicant(),
-            "upnp": get_upnp_settings()
+            "wpa_supplicant": str(get_wpa_supplicant()),
+            "upnp": str(get_upnp_settings())
         }
     }
     print(

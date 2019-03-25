@@ -11,8 +11,7 @@ Options:
   -v, --version             show version.
 
 Available dxmini commands:
-    agent           Agent Commands
-    provision       Provision
+    agent           DXMINI Agent Service
 
 See 'dxmini help <command>' for more information on a specific command.
 """
