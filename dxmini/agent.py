@@ -594,7 +594,7 @@ class AgentCommand():
 
         if not os.path.isfile('/etc/dxmini_serial'):
             newly_service_tag = get_service_tag()
-            logger.info("Hooray, new service tag number {tag}".format(tag=newly_service_tag)
+            logger.info("Hooray, new service tag number {tag}".format(tag=newly_service_tag))
         else:
             logger.error("Support file, OK")
 
