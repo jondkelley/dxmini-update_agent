@@ -375,33 +375,33 @@ def register_client():
     historical_calls = get_historical_calls()
     historical_rids = get_historical_rids()
     hello = {
-        "identity": {
+        "user": {
             "callsigns": {
                 "after_purchase":  historical_calls['first_call'],
                 "historical": historical_calls['callsign_history'],
                 "current": get_current_call(),
             },
-            "dmr": {
+            "radioids": {
                 "after_purchase":  historical_rids['first_rid'],
                 "historical": historical_rids['rid_history'],
                 "current": get_current_rid(),
             },
-            "service_tag": get_service_tag()
-        },
-        "rpi_img": {
-            "dashboard": str(get_dxmini_panel_version()),
-            "rev": get_revision(),
-            "model": get_model(),
+            "service_tag": get_service_tag(),
+            "ip": get_nat_ip(),
             "activation_dt": get_customer_production_date(),
             "device_uptime": uptime(),
             "tz": get_timezone(),
-            "ip": get_nat_ip()
+            "configuration": {
+                "settings": get_mmdvm_config(),
+                "upnp": get_upnp_settings()
+            }
         },
-        "configuration": {
-            "settings": get_mmdvm_config(),
-            "upnp": get_upnp_settings()
-        },
-        "image_information": get_pistar_image_version()
+        "rpi_release": get_pistar_image_version(),
+        "dxmini_release": {
+            "dashboard": str(get_dxmini_panel_version()),
+            "rev": get_revision(),
+            "model": get_model(),
+        }
     }
     print(
          json.dumps(hello, indent=3)
