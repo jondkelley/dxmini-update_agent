@@ -347,7 +347,7 @@ def file_age_in_seconds(pathname):
     """
     if not os.path.isfile(pathname):
         touch(pathname)
-    return time.time() - os.stat(pathname)[os.stat.ST_MTIME]
+    return time.time() - os.stat(pathname)[stat.ST_MTIME]
 
 def selfie_in():
     """
