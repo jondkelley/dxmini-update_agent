@@ -262,7 +262,7 @@ def get_historical_calls():
                     fi.write(json.dumps(history, indent=3))
                     return history
             else:
-                logger.info("Returning existing index")
+                logger.info("Returning existing CALL")
                 return history
 
 def get_historical_rids():
@@ -288,7 +288,7 @@ def get_historical_rids():
                     fi.write(json.dumps(history, indent=3))
                     return history
             else:
-                logger.info("Returning existing RID index")
+                logger.info("Returning existing RID")
                 return history
 
 def get_current_call():
