@@ -180,10 +180,8 @@ def get_upnp_settings():
     upnp_enabled_cmd = """grep '$DAEMON -a' /usr/local/sbin/pistar-upnp.service  | grep -e '^#' | awk '{ print "inside", $5 , "outside", $6, $7}'"""
     upnp_disabled_cmd = """grep '$DAEMON -a' /usr/local/sbin/pistar-upnp.service  | grep -v -e '^#' | awk '{ print "inside", $5 , "outside", $5, $6}'"""
     if os.path.isfile('/usr/local/sbin/pistar-upnp.service'):
-        p = subprocess.Popen(upnp_enabled_cmd, stdout=subprocess.PIPE, shell=True)
-        (enabled_upnp, err) = p.communicate()
-        p = subprocess.Popen(upnp_disabled_cmd, stdout=subprocess.PIPE, shell=True)
-        (disabled_upnp, err) = p.communicate()
+        enabled_upnp = subprocess.check_output(upnp_enabled_cmd).decode('utf-8').split()[0]
+        disabled_upnp = subprocess.check_output(upnp_disabled_cmd).decode('utf-8').split()[0]
         return {
             "enabled": str(enabled_upnp),
             "disabled": str(disabled_upnp)
@@ -208,9 +206,7 @@ def get_dxmini_panel_version():
     ew this is hacky
     """
     cmd = """curl -s http://localhost | grep 'version_panel' | grep 'pi-star' | cut -d'>' -f3  | awk '{ print $1 }'"""
-    p = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=True)
-    (current_version, err) = p.communicate()
-    return current_version.strip()
+    return subprocess.check_output(cmd).decode('utf-8').split()[0]
 
 def get_model():
     """
@@ -230,7 +226,7 @@ def get_timezone():
     if os.path.isfile(myfile):
         with open(myfile,"r") as fi:
             tz = fi.read()
-            return tz
+            return str(tz).strip()
     else:
         return None
 
@@ -409,12 +405,12 @@ def announce_client():
         },
         "device": {
             "dxmini_panel": str(get_dxmini_panel_version()),
-            "service_tag": get_service_tag().rstrip(),
+            "service_tag": get_service_tag(),
             "rev": get_revision(),
             "model": get_model(),
             "customer_production_start": get_customer_production_date(),
             "device_uptime": uptime(),
-            "tz": get_timezone().strip()
+            "tz": get_timezone()
         },
         "config": {
             "settings": get_mmdvm_config(),
@@ -603,7 +599,7 @@ class AgentCommand():
         ## Generate serial number
 
         if not os.path.isfile('/etc/dxmini_serial'):
-            newly_service_tag = get_service_tag()
+            newly_service_tag = get_service_tag().strip()
             logger.info("Hooray, new service tag number {tag}".format(tag=newly_service_tag))
         else:
             logger.info("Support file, OK")
