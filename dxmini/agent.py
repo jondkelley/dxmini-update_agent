@@ -180,8 +180,8 @@ def get_upnp_settings():
     upnp_enabled_cmd = """/bin/grep '$DAEMON -a' /usr/local/sbin/pistar-upnp.service  | /bin/grep -e '^#' | /usr/bin/awk '{ print "inside", $5 , "outside", $6, $7}'"""
     upnp_disabled_cmd = """/bin/grep '$DAEMON -a' /usr/local/sbin/pistar-upnp.service  | /bin/grep -v -e '^#' | /usr/bin/awk '{ print "inside", $5 , "outside", $5, $6}'"""
     if os.path.isfile('/usr/local/sbin/pistar-upnp.service'):
-        enabled_upnp = subprocess.check_output(upnp_enabled_cmd, shell=True).decode('utf-8').split('\n')
-        disabled_upnp = subprocess.check_output(upnp_disabled_cmd, shell=True).decode('utf-8').split('\n')
+        enabled_upnp = subprocess.check_output(upnp_enabled_cmd, shell=True).decode('utf-8').split('\n')[:-1]
+        disabled_upnp = subprocess.check_output(upnp_disabled_cmd, shell=True).decode('utf-8').split('\n')[:-1]
         return {
         "format_v1": {
             "upnp_on": enabled_upnp,
