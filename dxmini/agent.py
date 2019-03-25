@@ -255,14 +255,14 @@ def get_historical_calls():
         with open(histuser_file,"r") as fi:
             history = json.loads(fi.read())
             if get_current_call() not in history['callsign_history']:
-                logger.info("Adding new callsign to index")
+                logger.info("Adding new CALL")
                 history['callsign_history'].append(get_current_call())
                 with open(histuser_file,"w") as fi:
-                    logger.info("Build new callsign index")
+                    logger.info("Write new callsign index")
                     fi.write(json.dumps(history, indent=3))
                     return history
             else:
-                logger.info("Returning existing CALL")
+                logger.info("Returning CALL")
                 return history
 
 def get_historical_rids():
@@ -281,14 +281,14 @@ def get_historical_rids():
         with open(histuser_file,"r") as fi:
             history = json.loads(fi.read())
             if get_current_rid() not in history['rid_history']:
-                logger.info("Adding new RID index")
+                logger.info("Adding new RID")
                 history['rid_history'].append(get_current_rid())
                 with open(histuser_file,"w") as fi:
-                    logger.info("Build new RID index")
+                    logger.info("Write new RID index")
                     fi.write(json.dumps(history, indent=3))
                     return history
             else:
-                logger.info("Returning existing RID")
+                logger.info("Returning RID")
                 return history
 
 def get_current_call():
