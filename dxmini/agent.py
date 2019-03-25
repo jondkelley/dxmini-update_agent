@@ -205,7 +205,7 @@ def get_dxmini_panel_version():
     """
     ew this is hacky
     """
-    cmd = """/usr/bin/curl -s http://localhost | grep 'version_panel' | grep 'pi-star' | cut -d'>' -f3  | awk '{ print $1 }'"""
+    cmd = """/usr/bin/curl -s http://localhost | /bin/grep 'version_panel' | /bin/grep 'pi-star' | /usr/bin/cut -d'>' -f3  | /usr/bin/awk '{ print $1 }'"""
     return subprocess.check_output(cmd).decode('utf-8').split()[0]
 
 def get_model():
