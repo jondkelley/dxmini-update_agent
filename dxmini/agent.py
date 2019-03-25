@@ -47,6 +47,7 @@ from dxmini import DXMINI_MANIFEST_URL
 import subprocess
 import sys
 import os
+import stat
 import logging
 import requests
 import json
@@ -346,7 +347,7 @@ def file_age_in_seconds(pathname):
     """
     if not os.path.isfile(pathname):
         touch(pathname)
-    return time.time() - os.stat(pathname)[stat.ST_MTIME]
+    return time.time() - os.stat(pathname)[os.stat.ST_MTIME]
 
 def selfie_in():
     """
