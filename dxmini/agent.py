@@ -120,16 +120,16 @@ def get_upnp_settings():
     """
     retrieves current upnp configurations
     """
-    upnp_enabled_cmd = """grep '$DAEMON -a' /usr/local/sbin/pistar-upnp.service  | grep -e '^#' | awk '{ print "inside", $5 , "outside", $6 }'"""
-    upnp_disabled_cmd = """grep '$DAEMON -a' /usr/local/sbin/pistar-upnp.service  | grep -v -e '^#' | awk '{ print "inside", $5 , "outside", $6 }'"""
+    upnp_enabled_cmd = """grep '$DAEMON -a' /usr/local/sbin/pistar-upnp.service  | grep -e '^#' | awk '{ print "inside", $5 , "outside", $6, $7}'"""
+    upnp_disabled_cmd = """grep '$DAEMON -a' /usr/local/sbin/pistar-upnp.service  | grep -v -e '^#' | awk '{ print "inside", $5 , "outside", $5, $6}'"""
     if os.path.isfile('/usr/local/sbin/pistar-upnp.service'):
         p = subprocess.Popen(upnp_enabled_cmd, stdout=subprocess.PIPE, shell=True)
         (enabled_upnp, err) = p.communicate()
         p = subprocess.Popen(upnp_disabled_cmd, stdout=subprocess.PIPE, shell=True)
         (disabled_upnp, err) = p.communicate()
         return {
-            "enabled": enabled_upnp,
-            "disabled": disabled_upnp
+            "enabled": str(enabled_upnp),
+            "disabled": str(disabled_upnp)
             }
     else:
         return False
@@ -360,7 +360,7 @@ def announce_client():
         "config": {
             "settings": get_mmdvm_config(),
             "wpa_supplicant": str(get_wpa_supplicant()),
-            "upnp": str(get_upnp_settings())
+            "upnp": get_upnp_settings()
         }
     }
     print(
