@@ -158,7 +158,7 @@ def uptime():
     """
     return raspi uptime
     """
-    return subprocess.check_output(['cat', '/proc/uptime']).decode('utf-8').split()[0]
+    return float(subprocess.check_output(['cat', '/proc/uptime']).decode('utf-8').split()[0])
 
 def get_service_tag():
     """
@@ -170,7 +170,7 @@ def get_service_tag():
         logger.info("Returning SERVICE_TAG")
         with open(serialfile,"r") as fi:
             serial = fi.read()
-            return serial
+            return int(serial)
     else:
         serial = "".join(str(uuid.uuid4()).split('-')[3:]).upper()
         logger.warn("Generating new DXMNI service_tag {}".format(serial))
@@ -178,7 +178,7 @@ def get_service_tag():
         with open(serialfile,"w") as fi:
             fi.write(serial)
             fi.close()
-        return serial
+        return int(serial)
 
 def get_upnp_settings():
     """
@@ -193,14 +193,14 @@ def get_upnp_settings():
         disabled_ports = {'UDP': [], 'TCP': []}
         for line in enabled_upnp.rstrip().split('\n'):
             fields = line.split()
-            inside = fields[0]
-            outside = fields[1]
+            inside = int(fields[0])
+            outside = int(fields[1])
             proto = fields[2]
             enabled_ports[proto].append({"in": inside, "out": outside})
         for line in disabled_upnp.rstrip().split('\n'):
             fields = line.split()
-            inside = fields[0]
-            outside = fields[1]
+            inside = int(fields[0])
+            outside = int(fields[1])
             proto = fields[2]
             disabled_ports[proto].append({"in": inside, "out": outside})
         return {"enabled": enabled_ports, "disabled": disabled_ports}
