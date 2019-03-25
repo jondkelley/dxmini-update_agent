@@ -359,7 +359,7 @@ def announce_client():
         },
         "config": {
             "settings": get_mmdvm_config(),
-            "wpa_supplicant": str(get_wpa_supplicant()),
+            #"wpa_supplicant": get_wpa_supplicant(),
             "upnp": get_upnp_settings()
         }
     }
