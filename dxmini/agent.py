@@ -438,7 +438,7 @@ def register_client():
             "service_tag": get_service_tag(),
             "rev": get_revision(),
             "model": get_model(),
-            "customer_production_start": get_customer_production_date(),
+            "activation_dt": get_customer_production_date(),
             "device_uptime": uptime(),
             "tz": get_timezone(),
             "self_in": selfie_in(),
