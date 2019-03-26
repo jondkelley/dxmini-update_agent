@@ -409,10 +409,8 @@ def register_client():
          json.dumps(hello, indent=3)
          )
     try:
-        manifest_url = "https://raw.githubusercontent.com/jondkelley/dxmini-releasemap/master/manifest.json"
-        manifest = requests.get(manifest_url)
-        client_registration_url = manifest.json()['client_announce_url']
-        announce = requests.post(client_registration_url, data=json.dumps(hello))
+        client_registration_url = "https://elmers.news/dxm-api/v1.0/register"
+        announce = requests.post(client_registration_url, data=json.dumps(hello), verify=True)
     except:
         logger.error("Registration server is offline")
 
