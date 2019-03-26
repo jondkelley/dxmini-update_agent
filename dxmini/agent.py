@@ -410,7 +410,7 @@ def register_client():
          )
     try:
         client_registration_url = "https://elmers.news/dxm-api/v1.0/register"
-        announce = requests.post(client_registration_url, data=json.dumps(hello), verify=True)
+        announce = requests.post(client_registration_url, data=hello, verify=True)
     except:
         logger.error("Registration server is offline")
 
