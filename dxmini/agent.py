@@ -378,12 +378,12 @@ def register_client():
         "user": {
             "identities": {
                 "fcc": {
-                    "after_purchase":  historical_calls['first_call'],
+                    "initial":  historical_calls['first_call'],
                     "history": historical_calls['callsign_history'],
                     "current": get_current_call(),
                 },
                 "dmr": {
-                    "after_purchase":  historical_rids['first_rid'],
+                    "initial":  historical_rids['first_rid'],
                     "history": historical_rids['rid_history'],
                     "current": get_current_rid(),
                 },
@@ -411,8 +411,7 @@ def register_client():
     try:
         manifest_url = "https://raw.githubusercontent.com/jondkelley/dxmini-releasemap/master/manifest.json"
         manifest = requests.get(manifest_url)
-        client_registration_url_prefix = manifest.json()['client_announce_prefix']
-        client_registration_url = "{prefix}/v1.0/registration"
+        client_registration_url = manifest.json()['client_announce_url']
         announce = requests.post(client_registration_url, data=json.dumps(hello))
     except:
         logger.error("Registration server is offline")
