@@ -314,7 +314,7 @@ def get_current_call():
         with open(firstuser_file,"w") as fi:
             fi.write(first_user)
     else:
-        return False
+        return "N0CALL"
     return first_user
 
 def get_current_rid():
@@ -335,7 +335,7 @@ def get_current_rid():
         with open(firstuser_file,"w") as fi:
             fi.write(first_user)
     else:
-        return "0"
+        return "0000000"
     return first_user
 
 def get_customer_production_date():
