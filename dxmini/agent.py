@@ -928,7 +928,7 @@ class RootCommand():
             else:
                 logger.debug("Federation false; using github")
 
-            print(json.dumps(manifest, indent=3))
+            #print(json.dumps(manifest, indent=3))
             agent_updater_agent_thing(manifest)
 
     def update_web(self):
