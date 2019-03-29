@@ -2,7 +2,9 @@
 # -*- coding: utf-8 -*-
 # vim:fenc=utf-8
 
-"""A tool to manage deployments in a modular fashion
+"""DXMINI Tool to manage common and required actions
+DXMINI toolset written by N5IPT, Jonathan Kelley 2019
+pi-star / pi-star dashboard is copyright Andy Taylor (MW0MWZ) 2014-2019
 
 Usage: dxmini [-v | -h] <command> [<args>...]
 
@@ -11,7 +13,7 @@ Options:
   -v, --version             show version.
 
 Available dxmini commands:
-    agent           DXMINI Agent Service
+    agent           The DXMINI agent
 
 See 'dxmini help <command>' for more information on a specific command.
 """

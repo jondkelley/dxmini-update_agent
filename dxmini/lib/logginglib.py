@@ -50,4 +50,4 @@ class LoggerManager(object):
         return LoggerManager._loggers[name]
 
 log=LoggerManager().getLogger("dxmini")
-log.setLevel(level=logging.DEBUG)
+log.setLevel(level=logging.INFO)

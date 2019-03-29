@@ -33,7 +33,6 @@ def print_arguements(args):
     print(AnsiColor.red)
     print("{}{}".format(dash, AnsiColor.end))
 
-
 class AnsiColor(object):
     """
     life is better in color
