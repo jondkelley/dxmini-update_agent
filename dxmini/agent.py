@@ -788,7 +788,8 @@ def web_panel_updater(manifest):
             pass
         tf = tarfile.open(dashboard_filename)
         tf.extractall("./htdocs")
-        os.unlink("/var/www/dashboard")
+        shutil.rmtree('/var/www/dashboard')
+        ##os.unlink("/var/www/dashboard")
         os.rename("./htdocs/htdocs", "/var/www/dashboard")
 
 def preinst_script(manifest):
@@ -873,10 +874,10 @@ def agent_updater_agent_thing(manifest):
         #print(out)
         cmd = "sudo python3 dxmini-update_agent-{}/setup.py install".format(latest_python_agent)
         output = subprocess.check_output(cmd, shell=True).decode('utf-8').strip()
-        logger.warn(output)
-        logger.info("DXMINI agent update installed!")
+        logger.warn("Python {}".format(output))
+        logger.info("Agent update complete. Thanks for updating me!")
     else:
-        logger.info("DXMINI agent is up to date!")
+        logger.info("Agent is up to date!")
 
 class RootCommand():
     """
