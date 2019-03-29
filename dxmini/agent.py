@@ -850,7 +850,8 @@ def postinst_script(manifest):
     cmd = "sudo mv {name} /usr/bin; chmod 755 /usr/bin/{name}; bash -x /usr/bin/{name}".format(name=updater_filename)
     logger.info("Running post install scripts...")
     output = subprocess.check_output(cmd, shell=True).decode('utf-8').strip()
-    logger.warn(output)
+    #logger.warn(output)
+    logger.info("Install complete")
 
 def agent_updater_agent_thing(manifest):
     latest_python_agent = manifest['latest_python_agent']
@@ -883,7 +884,7 @@ def agent_updater_agent_thing(manifest):
         logger.warn("Python {}".format(output))
         cmd = "rm -rf /dxmini-update_agent"
         output = subprocess.check_output(cmd, shell=True).decode('utf-8').strip()
-        logger.info("Removing installer files {}".format(output))
+        logger.info("Removing `install`er files {}".format(output))
         logger.info("Agent update complete. Thanks for updating me!")
     else:
         logger.info("Agent is up to date!")
