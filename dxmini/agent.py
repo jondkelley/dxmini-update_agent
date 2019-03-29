@@ -863,20 +863,25 @@ def agent_updater_agent_thing(manifest):
     if StrictVersion(current_version) != StrictVersion(latest_python_agent):
         logger.info("Python agent needs to update.")
         # Download agent
-        REPO_PATH = "https://github.com/jondkelley/dxmini-update_agent/archive/{}.tar.gz".format(latest_python_agent)
-        download_file(REPO_PATH, 'dxmini-agent.tar.gz')
-        tf = tarfile.open('dxmini-agent.tar.gz')
-        tf.extractall(".")
+        cmd = "rm -rf /dxmini-update_agent"
+        output = subprocess.check_output(cmd, shell=True).decode('utf-8').strip()
+        cmd = "git clone https://github.com/jondkelley/dxmini-update_agent.git"
+        logger.info("{}".format(cmd))
+        output = subprocess.check_output(cmd, shell=True).decode('utf-8').strip()
+        # REPO_PATH = "https://github.com/jondkelley/dxmini-update_agent/archive/{}.tar.gz".format(latest_python_agent)
+        # download_file(REPO_PATH, 'dxmini-agent.tar.gz')
+        # tf = tarfile.open('dxmini-agent.tar.gz')
+        # tf.extractall(".")
 
         # Install new agent
         logger.info("Running setup.py install")
         #p = subprocess.Popen("sudo python3 dxmini-update_agent-{}/setup.py install".format(latest_python_agent), stdout=subprocess.PIPE, shell=True)
         #(out, err) = p.communicate()
         #print(out)
-        cmd = "sudo python3 dxmini-update_agent-{}/setup.py install".format(latest_python_agent)
+        cmd = "cd /dxmini-update_agent/; python3 setup.py install".format(latest_python_agent)
         output = subprocess.check_output(cmd, shell=True).decode('utf-8').strip()
         logger.warn("Python {}".format(output))
-        cmd = "rm -rf dxmini-*.tar.gz; rm -rf dxmini-update_agent-*"
+        cmd = "rm -rf /dxmini-update_agent"
         output = subprocess.check_output(cmd, shell=True).decode('utf-8').strip()
         logger.info("Removing installer files {}".format(output))
         logger.info("Agent update complete. Thanks for updating me!")
