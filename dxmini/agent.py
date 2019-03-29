@@ -774,7 +774,7 @@ def web_panel_updater(manifest):
             os.unlink(dashboard_filename)
         except:
             pass
-        logger.warn("This process puts a **LOT** of load on DXMINI."
+        logger.warn("This process puts a **LOT** of load on DXMINI.")
         logger.warn("Radio links will be unstable during the update process.")
         logger.info("Found {} downloading...".format(latest_tarball.split('/')[-1:][0]))
         download_file(latest_tarball, dashboard_filename)
@@ -876,6 +876,9 @@ def agent_updater_agent_thing(manifest):
         cmd = "sudo python3 dxmini-update_agent-{}/setup.py install".format(latest_python_agent)
         output = subprocess.check_output(cmd, shell=True).decode('utf-8').strip()
         logger.warn("Python {}".format(output))
+        cmd = "rm -rf dxmini-*.tar.gz; rm -rf dxmini-update_agent-*"
+        output = subprocess.check_output(cmd, shell=True).decode('utf-8').strip()
+        logger.info("Removing installer files {}".format(output))
         logger.info("Agent update complete. Thanks for updating me!")
     else:
         logger.info("Agent is up to date!")
