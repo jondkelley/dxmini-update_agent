@@ -46,6 +46,7 @@ import tarfile
 import time
 import uuid
 logger = logging.getLogger(__name__)
+os.cwd('/')
 
 def flash_writable(mntpoint):
     """
