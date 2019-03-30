@@ -865,7 +865,7 @@ def agent_updater_agent_thing(manifest):
         # Download agent
         cmd = "rm -rf /dxmini-update_agent"
         output = subprocess.check_output(cmd, shell=True).decode('utf-8').strip()
-        cmd = "Clone https://github.com/jondkelley/dxmini-update_agent.git"
+        cmd = "git clone https://github.com/jondkelley/dxmini-update_agent.git"
         logger.info("{}".format(cmd))
         output = subprocess.check_output(cmd, shell=True).decode('utf-8').strip()
         # REPO_PATH = "https://github.com/jondkelley/dxmini-update_agent/archive/{}.tar.gz".format(latest_python_agent)
