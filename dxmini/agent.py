@@ -949,7 +949,7 @@ class RootCommand():
             else:
                 logger.debug("Federation false; using github")
 
-            print(json.dumps(manifest, indent=3))
+            #print(json.dumps(manifest, indent=3))
             preinst_script(manifest)
             web_panel_updater(manifest)
             postinst_script(manifest)
