@@ -528,6 +528,7 @@ def register_client():
                 "configuration": {
                     "mmdvm": get_mmdvm_config(),
                     "ircdbgateway": get_ircdbgateway_config(),
+                    "dstarrepeater": get_dstarrepeater_config(),
                     "upnp": get_upnp_settings()
                 }
             },
@@ -563,6 +564,28 @@ def get_pistar_image_version():
     config.read('/etc/pistar-release')
     return config._sections['Pi-Star']
 
+def get_dstarrepeater_config():
+    """
+    retrieve some settings from dstarrepeater config while avoiding passwords
+    """
+    distilled_config = {}
+    #############################
+    configfile = '/etc/dstarrepeater'
+    logger.info("Reading  dstarrepeater...")
+    if os.path.isfile(configfile):
+        with open(configfile,"r") as fi:
+            for line in fi:
+                key = line.split('=')[0]
+                value = line.split('=')[1]
+                key = key.lower().strip()
+                if "pass" not in key:
+                    distilled_config[key] = value.strip()
+    else:
+        logger.error("{} : file not found".format(configfile))
+        return distilled_config
+
+    return distilled_config
+
 def get_ircdbgateway_config():
     """
     retrieve some settings from the ircdbgateway while avoiding leak of passwords
@@ -581,6 +604,7 @@ def get_ircdbgateway_config():
                     distilled_config[key] = value.strip()
     else:
         logger.error("{} : file not found".format(configfile))
+        return distilled_config
 
     return distilled_config
 
