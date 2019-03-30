@@ -775,8 +775,6 @@ def web_panel_updater(manifest):
             os.unlink(dashboard_filename)
         except:
             pass
-        logger.warn("This process puts a **LOT** of load on DXMINI.")
-        logger.warn("Radio links will be unstable during the update process.")
         logger.info("Found {} downloading...".format(latest_tarball.split('/')[-1:][0]))
         download_file(latest_tarball, dashboard_filename)
 
