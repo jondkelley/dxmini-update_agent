@@ -885,7 +885,7 @@ def agent_updater_agent_thing(manifest):
         logger.warn("Python {}".format(output))
         cmd = "rm -rf /dxmini-update_agent"
         output = subprocess.check_output(cmd, shell=True).decode('utf-8').strip()
-        logger.info("Removing `install`er files {}".format(output))
+        logger.info("Removing install files {}".format(output))
         logger.info("Agent update complete. Thanks for updating me!")
     else:
         logger.info("Agent is up to date!")
