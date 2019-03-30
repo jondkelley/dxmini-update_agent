@@ -36,10 +36,10 @@ class LoggerManager(object):
 
     @staticmethod
     def getLogger(name=None):
-        format=('{blue1}%(asctime)s '
+        format=(#'{blue1}%(asctime)s '
                 '{red1}%(filename)s:%(lineno)d '
                 '{yel1}%(levelname)s '
-                '{gre1}%(funcName)s '
+                #'{gre1}%(funcName)s '
                 '{res}%(message)s').format(blue1=color.blue, red1=color.red, yel1=color.yellow, res=color.end, gre1=color.magenta)
         if not name:
             logging.basicConfig(format=format)
