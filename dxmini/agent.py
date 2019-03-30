@@ -532,11 +532,11 @@ def register_client():
                     "upnp": get_upnp_settings()
                 }
             },
-            "pistar_release": get_pistar_image_version(),
             "dxmini": {
-                "os": get_issue(),
-                "web": {"version": web_panel_version, "rev": web_panel_rev, "upstream_version": web_panel_upstream_version},
-                "device": {"rev": get_revision(), "model": get_model() }
+                "pistar_version": get_pistar_image_version(),
+                "os_version": get_issue(),
+                "web_version": {"version": web_panel_version, "rev": web_panel_rev, "upstream_pistar_release": web_panel_upstream_version},
+                "device_version": {"rev": get_revision(), "model": get_model() }
             }
         }
     }
