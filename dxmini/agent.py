@@ -447,6 +447,25 @@ def get_service_tag():
             fi.close()
         return int(serial)
 
+def get_shadow_tag():
+    """
+    returns shadow tag from flash memory
+    generates one if it's not found
+    """
+    serialfile = '/etc/dxmini_shadow'
+    if os.path.isfile(serialfile):
+        logger.info("Reading  SERVICE_TAG...")
+        with open(serialfile,"r") as fi:
+            serial = fi.read()
+            return serial
+    else:
+        serial = "".join(str(uuid.uuid4()).split('-')).upper()
+        logger.warn("Generating new DXMNI shadow_tag {}".format(serial))
+        with open(serialfile,"w") as fi:
+            fi.write(serial)
+            fi.close()
+        return serial
+
 def get_upnp_settings():
     """
     retrieves current upnp configurations
@@ -700,6 +719,7 @@ def register_client():
     hello = {
         "entry": {
             "user": {
+                "message_authentication_code": get_shadow_tag(),
                 "tz": get_timezone(),
                 "activation_dt": { 'dt': get_customer_production_date(), 'datetime': time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(get_customer_production_date()))},
                 "identities": {
