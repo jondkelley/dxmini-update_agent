@@ -7,6 +7,7 @@ This toolset written by N5IPT, Jonathan Kelley 2019
 pi-star / pi-star dashboard is copyright Andy Taylor (MW0MWZ) 2014-2019
 
 Usage:
+    dxmini agent --activity
     dxmini agent --register
     dxmini agent --update_check
     dxmini agent --update_agent
@@ -17,7 +18,10 @@ Usage:
 
 """
 
+from configparser import (ConfigParser, MissingSectionHeaderError,
+                          ParsingError, DEFAULTSECT)
 from collections import defaultdict
+from dateutil import parser
 from distutils.version import StrictVersion
 from docopt import docopt
 from dxmini import DXMINI_MANIFEST_URL
@@ -134,8 +138,202 @@ def mk_ping_crontab():
         os.chmod(cronfile, 755);
 
 ##########################
+# activity log functions and stuff
+##########################
+
+def fetch_activity():
+    """
+    fetches link activites
+    """
+    records = dict()
+    records['DExtra'] = list()
+    records['Repeater'] = list()
+    #
+    with open('/var/log/pi-star/Headers.log',"r") as fi:
+        try:
+            for line in fi:
+                if "DExtra" in line:
+                    introspect0 = line.split(' ')
+                    date = introspect0[0]
+                    time = introspect0[1].rstrip(':')
+                    introspect1 = line.split(':')
+                    fieldmy = introspect1[4].rstrip(' Your').strip().split(' ')[0]
+                    fieldmy1 = fieldmy.split('/')[0].strip().split(' ')[0]
+                    try:
+                        fieldmy2 = fieldmy.split('/')[1].strip().split(' ')[0]
+                    except IndexError:
+                        fieldmy2 = None
+                    fieldur = introspect1[5].rstrip('Rpt1').strip()
+                    fieldrpt1 = introspect1[6].rstrip('Rpt2').strip()
+                    fieldrpt1 = { "call": fieldrpt1.split(' ')[0], "interface": fieldrpt1.strip().split(' ')[1] }
+                    fieldrpt2 = introspect1[7].rstrip('Flags').strip()
+                    fieldrpt2 = { "call": fieldrpt2.strip().split(' ')[0], "interface": fieldrpt2.split(' ')[1] }
+                    fieldflags1 = introspect1[8]
+                    fieldflags2 = introspect1[9]
+                    fieldflags = "{}{}".format(fieldflags1, fieldflags2).split('(')[0].strip().split(' ')
+                    source = "{}:{}".format(fieldflags1, fieldflags2).split('(')[1].strip().rstrip(')')
+                    datetime = "{} {}".format(date, time)
+                    dt = int(parser.parse(datetime).timestamp())
+                    records['DExtra'].append({"dt": dt, "datetime": datetime, "my": {"raw": fieldmy, "call": fieldmy1, "suffix": fieldmy2}, "ur": fieldur, "rpt1": fieldrpt1, "rpt2": fieldrpt2, "flags": fieldflags, "source": source})
+                elif "Repeater header" in line:
+                    introspect0 = line.split(' ')
+                    date = introspect0[0]
+                    time = introspect0[1].rstrip(':')
+                    introspect1 = line.split(':')
+                    fieldmy = introspect1[4].rstrip(' Your').strip()
+                    fieldmy1 = fieldmy.split('/')[0].strip()
+                    try:
+                        fieldmy2 = fieldmy.split('/')[1].strip().split(' ')[0]
+                    except IndexError:
+                        fieldmy2 = None
+                    fieldur = introspect1[5].rstrip('Rpt1').strip()
+                    fieldrpt1 = introspect1[6].rstrip('Rpt2').strip()
+                    fieldrpt1 = { "call": fieldrpt1.split(' ')[0], "interface": fieldrpt1.strip().split(' ')[1] }
+                    fieldrpt2 = introspect1[7].rstrip('Flags').strip()
+                    fieldrpt2 = { "call": fieldrpt2.strip().split(' ')[0], "interface": fieldrpt2.split(' ')[1] }
+                    fieldflags1 = introspect1[8]
+                    fieldflags2 = introspect1[9]
+                    fieldflags = "{}{}".format(fieldflags1, fieldflags2).split('(')[0].strip().split(' ')
+                    source = "{}:{}".format(fieldflags1, fieldflags2).split('(')[1].strip().rstrip(')')
+                    datetime = "{} {}".format(date, time)
+                    dt = int(parser.parse(datetime).timestamp())
+                    records['Repeater'].append({"dt": dt, "datetime": datetime, "my": {"raw": fieldmy, "call": fieldmy1, "suffix": fieldmy2}, "ur": fieldur, "rpt1": fieldrpt1, "rpt2": fieldrpt2, "flags": fieldflags, "source": source})
+        except:
+            pass
+    return records
+
+##########################
 # ping functions and stuff
 ##########################
+class StrictConfigParser(ConfigParser):
+    """
+    transform ini files into python dictionaries
+    """
+    def _read(self, fp, fpname):
+        cursect = None                        # None, or a dictionary
+        optname = None
+        lineno = 0
+        e = None                              # None, or an exception
+        while True:
+            line = fp.readline()
+            if not line:
+                break
+            lineno = lineno + 1
+            # comment or blank line?
+            if line.strip() == '' or line[0] in '#;':
+                continue
+            if line.split(None, 1)[0].lower() == 'rem' and line[0] in "rR":
+                # no leading whitespace
+                continue
+            # continuation line?
+            if line[0].isspace() and cursect is not None and optname:
+                value = line.strip()
+                if value:
+                    cursect[optname].append(value)
+            # a section header or option header?
+            else:
+                # is it a section header?
+                mo = self.SECTCRE.match(line)
+                if mo:
+                    sectname = mo.group('header')
+                    if sectname in self._sections:
+                        raise ValueError('Duplicate section %r' % sectname)
+                    elif sectname == DEFAULTSECT:
+                        cursect = self._defaults
+                    else:
+                        cursect = self._dict()
+                        ##cursect['__python_style_key__'] = sectname.lower().replace(' ', '_')
+                        self._sections[sectname] = cursect
+                    # So sections can't start with a continuation line
+                    optname = None
+                # no section header in the file?
+                elif cursect is None:
+                    raise MissingSectionHeaderError(fpname, lineno, line)
+                # an option line?
+                else:
+                    try:
+                        mo = self._optcre.match(line)   # 2.7
+                    except AttributeError:
+                        mo = self.OPTCRE.match(line)    # 2.6
+                    if mo:
+                        optname, vi, optval = mo.group('option', 'vi', 'value')
+                        optname = self.optionxform(optname.rstrip())
+                        # This check is fine because the OPTCRE cannot
+                        # match if it would set optval to None
+                        if optval is not None:
+                            if vi in ('=', ':') and ';' in optval:
+                                # ';' is a comment delimiter only if it follows
+                                # a spacing character
+                                pos = optval.find(';')
+                                if pos != -1 and optval[pos - 1].isspace():
+                                    optval = optval[:pos]
+                            optval = optval.strip()
+                            # allow empty values
+                            if optval == '""':
+                                optval = ''
+                            cursect[optname] = [optval]
+                        else:
+                            # valueless option handling
+                            cursect[optname] = optval
+                    else:
+                        # a non-fatal parsing error occurred.  set up the
+                        # exception but keep going. the exception will be
+                        # raised at the end of the file and will contain a
+                        # list of all bogus lines
+                        if not e:
+                            e = ParsingError(fpname)
+                        e.append(lineno, repr(line))
+        # if any parsing errors occurred, raise an exception
+        if e:
+            raise e
+
+        # join the multi-line values collected while reading
+        all_sections = [self._defaults]
+        all_sections.extend(self._sections.values())
+        for options in all_sections:
+            for name, val in options.items():
+                if isinstance(val, list):
+                    options[name] = '\n'.join(val)
+
+    def dget(self, section, option, default=None, type=str):
+        if not self.has_option(section, option):
+            return default
+        if type is str:
+            return self.get(section, option)
+        elif type is int:
+            return self.getint(section, option)
+        elif type is bool:
+            return self.getboolean(section, option)
+        else:
+            raise NotImplementedError()
+
+def load_ini_as_dict(infile):
+    """
+    loads an ini file as a dictionary avoiding the load of passwords
+    """
+    cfg = StrictConfigParser()
+    config = {}
+    try:
+        with open(infile) as fi:
+            cfg.readfp(fi)
+    except:
+        return config
+
+    for section in cfg.sections():
+        config[section] = {}
+        for name, value in cfg.items(section):
+            if "pass" in name.lower():
+                value = "###__REDACTED__###"
+            value = value.strip("\"")
+            value = "".join(value)
+            ###section_new = section.lower().replace(' ', '_')
+            config[section][name] = [x.strip() for x in value.split() if x]
+            if len(config[section][name]) == 1:
+                config[section][name] = config[section][name][0]
+            elif len(config[section][name]) == 0:
+                config[section][name] = ''
+    return config
+
 def creation_date(path_to_file):
     """
     Try to get the date that a file was created, falling back to when it was
@@ -502,6 +700,8 @@ def register_client():
     hello = {
         "entry": {
             "user": {
+                "tz": get_timezone(),
+                "activation_dt": { 'dt': get_customer_production_date(), 'datetime': time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(get_customer_production_date()))},
                 "identities": {
                     "ham": {
                         "initial":  historical_calls['first_call'],
@@ -515,28 +715,39 @@ def register_client():
                     },
                 },
                 "service_tag": get_service_tag(),
-                "interface": get_interface(),
+                "configuration": {
+                    #"mmdvm": get_mmdvm_config(),
+                    "ircdbgateway": get_ircdbgateway_config(),
+                    "dstarrepeater": get_dstarrepeater_config(),
+                    "dapnetgateway": load_ini_as_dict('/etc/dapnetgateway'),
+                    "dstar-radio.mmdvmhost": load_ini_as_dict('/etc/dstar-radio.mmdvmhost'),
+                    "pistar-remote": load_ini_as_dict('/etc/pistar-remote'),
+                    "ysf2dmr": load_ini_as_dict('/etc/ysf2dmr'),
+                    "ysf2nxdn": load_ini_as_dict('/etc/ysf2nxdn'),
+                    "ysf2p25": load_ini_as_dict('/etc/ysf2p25'),
+                    "ysfgateway": load_ini_as_dict('/etc/ysfgateway'),
+                    "pistar-keeper": load_ini_as_dict('/etc/pistar-keeper'),
+                    "pistar-remote": load_ini_as_dict('/etc/pistar-remote'),
+                    "p25gateway": load_ini_as_dict('/etc/p25gateway'),
+                    "mmdvmhost": load_ini_as_dict('/etc/mmdvmhost')
+                }
+            },
+            "network": {
+                "upnp": get_upnp_settings(),
                 "latency": {
                     "lan": { "scale": gw_ping.split(" ")[1], "value": gw_ping.split(" ")[0]},
                     "wan": { "scale": net_ping.split(" ")[1], "value": net_ping.split(" ")[0]},
                 },
                 "hostname": get_hostname(),
-                "system_temp": { "f": temp[0], "c": temp[1] },
-                "activation_dt": { 'dt': get_customer_production_date(), 'datetime': time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(get_customer_production_date()))},
-                "device_uptime": { "days": uptime1()[0], "hours": uptime1()[1], "minutes": uptime1()[2], "seconds": uptime1()[3], "total_seconds": uptime() },
-                "tz": get_timezone(),
-                "configuration": {
-                    "mmdvm": get_mmdvm_config(),
-                    "ircdbgateway": get_ircdbgateway_config(),
-                    "dstarrepeater": get_dstarrepeater_config(),
-                    "upnp": get_upnp_settings()
-                }
+                "interface": get_interface(),
             },
             "dxmini": {
+                "system_temp": { "f": temp[0], "c": temp[1] },
                 "pistar_version": get_pistar_image_version(),
                 "os_version": get_issue(),
                 "web_version": {"version": web_panel_version, "rev": web_panel_rev, "upstream_pistar_release": web_panel_upstream_version},
-                "device_version": {"rev": get_revision(), "model": get_model() }
+                "device_version": {"rev": get_revision(), "model": get_model() },
+                "device_uptime": { "days": uptime1()[0], "hours": uptime1()[1], "minutes": uptime1()[2], "seconds": uptime1()[3], "total_seconds": uptime() },
             }
         }
     }
@@ -545,14 +756,38 @@ def register_client():
         client_registration_url = "https://elmers.news/dxm-api/v1.0/register"
         logger.debug("JSON Payload : {}".format(hello))
         announce = requests.post(client_registration_url, data=json.dumps(hello), verify=True, timeout=5)
+        if not announce.status_code == requests.codes.ok:
+            logger.error("dxmini api error, http status code fail {}".format(announce.status_code))
     except requests.exceptions.HTTPError as errh:
-        logger.error("dxmini registration error : HTTPError {}".format(errh))
+        logger.error("dxmini api error : HTTPError {}".format(errh))
     except requests.exceptions.ConnectionError as errc:
-        logger.error("dxmini registration error : ConnectionError {}".format(errc))
+        logger.error("dxmini api error : ConnectionError {}".format(errc))
     except requests.exceptions.Timeout as errt:
-        logger.error("dxmini registration error : Timeout {}".format(errt))
+        logger.error("dxmini api error : Timeout {}".format(errt))
     except requests.exceptions.RequestException as err:
-        logger.error("dxmini registration error : RequestException {}".format(err))
+        logger.error("dxmini api error : RequestException {}".format(err))
+
+def register_activity():
+    service_tag = get_service_tag()
+    hello = {
+        "tz": get_timezone(),
+        "logs": fetch_activity()
+    }
+    try:
+        logger.info("Sending activity...")
+        client_registration_url = "https://elmers.news/dxm-api/v1.0/activity/{}".format(service_tag)
+        logger.info("JSON Payload : {}".format(hello))
+        announce = requests.post(client_registration_url, data=json.dumps(hello), verify=True, timeout=5)
+        if not announce.status_code == requests.codes.ok:
+            logger.error("dxmini api error, http status code fail {}".format(announce.status_code))
+    except requests.exceptions.HTTPError as errh:
+        logger.error("dxmini api error : HTTPError {}".format(errh))
+    except requests.exceptions.ConnectionError as errc:
+        logger.error("dxmini api error : ConnectionError {}".format(errc))
+    except requests.exceptions.Timeout as errt:
+        logger.error("dxmini api error : Timeout {}".format(errt))
+    except requests.exceptions.RequestException as err:
+        logger.error("dxmini api error : RequestException {}".format(err))
 
 def get_pistar_image_version():
     """
@@ -578,8 +813,9 @@ def get_dstarrepeater_config():
                 key = line.split('=')[0]
                 value = line.split('=')[1]
                 key = key.lower().strip()
-                if "pass" not in key:
-                    distilled_config[key] = value.strip()
+                if "pass" in key:
+                    value = "###__REDACTED__###"
+                distilled_config[key] = value.strip()
     else:
         logger.error("{} : file not found".format(configfile))
         return distilled_config
@@ -983,6 +1219,12 @@ class RootCommand():
         with MicroSdCard("/"):
             mk_ping_crontab()
             register_client()
+
+    def activity(self):
+        """
+        registers the dxmini activity
+        """
+        register_activity()
 
     def version(self):
         """
