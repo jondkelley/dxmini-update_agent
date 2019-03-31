@@ -21,6 +21,7 @@ Usage:
 from configparser import (ConfigParser, MissingSectionHeaderError,
                           ParsingError, DEFAULTSECT)
 from collections import defaultdict
+import datetime
 from dateutil import parser
 from distutils.version import StrictVersion
 from docopt import docopt
@@ -145,6 +146,7 @@ def fetch_activity():
     """
     fetches link activites
     """
+
     records = dict()
     records['DExtra'] = list()
     records['Repeater'] = list()
@@ -201,6 +203,44 @@ def fetch_activity():
         except:
             pass
     return records
+
+def fetch_keyevents():
+    """
+    fetches link activites
+    """
+
+    keyevents = []
+    linepairs = []
+    now = datetime.datetime.now()
+    logfile = '/var/log/pi-star/MMDVM-{dt}.log'.format(dt=now.strftime("%Y-%m-%d"))
+    with open(logfile,"r") as fi:
+        for line in fi:
+            if ("received RF header" in line) or ("received RF end of transmission" in line):
+                linepairs.append(line)
+                print(line)
+
+    try:
+        COMPLETE = True
+        linepairs = [{linepairs[i].split(' ')[2]: {linepairs[i]:linepairs[i+1]}} for i in range(0,len(linepairs),2)]
+    except:
+        linepairs = []
+        print("Transmissions are incomplete, no data can be captured")
+
+    for pair in linepairs:
+        for k, pairs in pair.items():
+            for start, end in pairs.items():
+                time = start.split(' ')
+                time = "{} {}".format(time[1], time[2])
+                callsign = start.split('to')[0].rstrip().split('from')[1].lstrip().split(' ')[0]
+                suffix = start.split('to')[0].rstrip().split('from')[1].lstrip().split('/')[1]
+                to = start.split('to')[1].strip()
+                timekeyed = end.split('transmission, ')[1].split(' ')[0]
+                ber = end.split('transmission, ')[1].split(':')[1].split()[0].rstrip(',').split('%')[0]
+                rssi = end.split('transmission, ')[1].split(':')[2].strip().split(' ')[0].split('/')
+                rssi = [int(x) for x in rssi]
+                keyevents.append({ time: {"callsign": callsign, "suffix": suffix, "to": to, "keytime": float(timekeyed), "ber": float(ber), "rssi": rssi}})
+
+    return keyevents
 
 ##########################
 # ping functions and stuff
@@ -454,7 +494,7 @@ def get_shadow_tag():
     """
     serialfile = '/etc/dxmini_shadow'
     if os.path.isfile(serialfile):
-        logger.info("Reading  SERVICE_TAG...")
+        logger.info("Reading  SHADOW_TAG...")
         with open(serialfile,"r") as fi:
             serial = fi.read()
             return serial
@@ -719,7 +759,7 @@ def register_client():
     hello = {
         "entry": {
             "user": {
-                "message_authentication_code": get_shadow_tag(),
+                "api_token": get_shadow_tag(),
                 "tz": get_timezone(),
                 "activation_dt": { 'dt': get_customer_production_date(), 'datetime': time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(get_customer_production_date()))},
                 "identities": {
@@ -773,7 +813,7 @@ def register_client():
     }
     try:
         logger.info("Sending registration...")
-        client_registration_url = "https://elmers.news/dxm-api/v1.0/register"
+        client_registration_url = "https://api.dxmini.com/dxm-api/v1.0/register"
         logger.debug("JSON Payload : {}".format(hello))
         announce = requests.post(client_registration_url, data=json.dumps(hello), verify=True, timeout=5)
         if not announce.status_code == requests.codes.ok:
@@ -791,11 +831,12 @@ def register_activity():
     service_tag = get_service_tag()
     hello = {
         "tz": get_timezone(),
-        "logs": fetch_activity()
+        "logs": fetch_activity(),
+        "keyevents": fetch_keyevents()
     }
     try:
         logger.info("Sending activity...")
-        client_registration_url = "https://elmers.news/dxm-api/v1.0/activity/{}".format(service_tag)
+        client_registration_url = "https://api.dxmini.com/dxm-api/v1.0/activity/{}".format(service_tag)
         logger.info("JSON Payload : {}".format(hello))
         announce = requests.post(client_registration_url, data=json.dumps(hello), verify=True, timeout=5)
         if not announce.status_code == requests.codes.ok:
